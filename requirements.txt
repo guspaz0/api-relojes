@@ -1,0 +1,6 @@
+fastapi
+pyzk
+python-dotenv
+psycopg2-binary
+uvicorn
+PyJWT

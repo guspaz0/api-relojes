@@ -1,0 +1,40 @@
+services:
+  relojes:
+    container_name: api-relojes-standalone
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    image: api-relojes
+    volumes:
+      - .:/usr/code
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    links:
+      - db-fichadas:dbfichadas
+    depends_on:
+      db-fichadas:
+        condition: service_healthy
+        restart: true
+  db-fichadas:
+    container_name: db-reloj
+    build:
+      dockerfile: ./Dockerfile-db
+      context: ./
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    volumes:
+      - $POSTGRES_DATA:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
